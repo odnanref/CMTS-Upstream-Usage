@@ -32,7 +32,7 @@ my $outfile;
 my $DEBUG=0;
 
 #
-# Passa os dados para um file CSV
+# move Data to a file in CSV format
 #
 sub toCSV
 {
@@ -41,8 +41,8 @@ sub toCSV
 	my %value;
 	my $csv;
 	# Titulo do CSV
-	$csv = '"Interface";"SNR";"Upstream Freq";"Upstream Modulacao";"Channel Width";"power level"'.
-		';"online";"offline";"total";"Frequencia de Downstream"'.
+	$csv = '"Interface";"SNR";"Upstream Freq";"Upstream Modulation";"Channel Width";"power level"'.
+		';"online";"offline";"total";"Frequency Downstream"'.
 		"\n";
 	while ( my ($key, $value) = each(%lista) ) 
 	{
@@ -62,14 +62,14 @@ sub toCSV
 	
 	if ($outfile ne '' )
 	{
-		print "nome do ficheiro csv ".$outfile.".csv \n";
+		print "name of csv file ".$outfile.".csv \n";
 		open(FH, "> ".$outfile.".csv");
 		print FH $csv;
 		close(FH);
 	}
 }
 #
-# LE a info do CMTS
+# Reads info from the CMTS
 #
 sub SnrStatus {
 	my (%lista);
@@ -157,29 +157,29 @@ sub SnrStatus {
 
 
 #
-# Codigo inicia-se aqui
+# Running code starts here
 #
 print " cmtsUsage \n";
-print " A iniciar com argumentos 0=".$ARGV[0]." 1=".$ARGV[1]." 2=".$ARGV[2]." 3=".$ARGV[3]."\n";
+print " Starting with arguments 0=".$ARGV[0]." 1=".$ARGV[1]." 2=".$ARGV[2]." 3=".$ARGV[3]."\n";
 if ($ARGV[0] ne '--file'){
 	my $fail = 0 ;
 	if ($ARGV[1] eq ''){
-		print "Argumento 1 deve indicar o IP.\n";
+		print "Argument 1 should be IP.\n";
 		$fail = 1;
 	}
 	
 	if ($ARGV[2] eq ''){
-		print "Argumento 2 deve indicar a community.\n";
+		print "Argument 2 should be community.\n";
 		$fail = 1;
 	}
 	
 	if ($ARGV[3] eq ''){
-		print "Argumento 3 deve indicar o tipo de cmts ex(cisco).\n";
+		print "Argumento 3 should be the type of CMTS ex(cisco).\n";
 		$fail = 1;
 	}
 	
 	if ($ARGV[4] eq ''){
-		print "Argumento 4 deve indicar o ficheiro csv.\n";
+		print "Argument 4 sould be the csv file.\n";
 		$fail = 1;
 	}
 	
@@ -210,7 +210,7 @@ if ($ARGV[0] ne '--file'){
 		chomp($type);
 		$outfile = $ip;
 		$outfile =~ s/\.//gi;
-		print "A ler ".$ip." ".$community." ".$type." para ficheiro csv ".$outfile.".csv \n";
+		print "Reading ".$ip." ".$community." ".$type." to csv file ".$outfile.".csv \n";
 		SnrStatus($ip, $community, $type);		
 	}
 } 
