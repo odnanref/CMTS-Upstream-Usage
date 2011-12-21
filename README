@@ -1,3 +1,15 @@
  
  Get CMTS Status from upstream interfaces
 
+ Starting with arguments 0= 1= 2= 3=
+ Argument 1 should place IP address or hostname.
+ Argument 2 should place community.
+ Argument 3 should place type of cmts ex(cisco).
+ Argument 4 should place csv file.
+
+ Also available read the options from a file list with ; separating the fields
+ example line in file = IP;COMMUNITY;TYPE
+ pass argument --file NAME_OF_FILE.txt
+
+This Perl script requires snmpwalk to get SNMP output from the CMTS
+
