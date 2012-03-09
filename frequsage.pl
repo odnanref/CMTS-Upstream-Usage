@@ -16,47 +16,69 @@
 # 
 # A copy online can be found at http://www.gnu.org/licenses/gpl-2.0.html 
 #
-use strict;
-#use Data::Dumper;
+#use strict;
+use Data::Dumper;
 use oids;
 
 my $walker = '/usr/bin/snmpwalk ';
+# total cm's online
 my $totalOn = 0;
 my $totalOff = 0;
 my $totalAct = 0;
 my $i;
+# id to use in the oid query
 my $id;
+# mib is actually a oid
 my $mib;
+# hash with snmp oid's to fetch from cmts
 my (%hash);
+# name of csv output file default is the ip.csv ip withouht dots
 my $outfile;
-my $DEBUG=0;
+# set to 1 to enable code debug
+my $DEBUG	=0;
+# screen output alert if snr differs 
+my $ALERTSNR=0;
+# specify's by default that there should be a csv output file
+my $CSVOUT	=1;
 
+#
+# test specific settings
+#
+#
+sub testData {
+	my $Data;
+	($Data) = @_;
+	if ($Data->{'snr'} > 30 ) {
+		# work todo 
+		 print "OI";
+	}
+}
 #
 # move Data to a file in CSV format
 #
 sub toCSV
 {
 	my (%lista) = @_;
-	
-	my %value;
 	my $csv;
 	# Titulo do CSV
 	$csv = '"Interface";"SNR";"Upstream Freq";"Upstream Modulation";"Channel Width";"power level"'.
 		';"online";"offline";"total";"Frequency Downstream"'.
 		"\n";
+
 	while ( my ($key, $value) = each(%lista) ) 
+#	for my $key (keys %$lista )
 	{
         $csv .= '"'.$key .'";';
 		$csv .= '"'.
-				$lista{$key}{snr}.'";"'.
-				$lista{$key}{frequencia}.'";"'.
-				$lista{$key}{modulacao}.'";"'.
-				$lista{$key}{channelwidth} . '";"'.
-				$lista{$key}{powerlevel}.'";"'.
-				$lista{$key}{online} . '";"'.
-				$lista{$key}{offline} . '";"'.
-				$lista{$key}{total}.'";"'.
-				$lista{$key}{downstreamfreq} . '"'
+				$lista{$key}->{snr}.'";"'.
+				$lista{$key}->{frequencia}.'";"'.
+				$lista{$key}->{modulacao}.'";"'.
+				$lista{$key}->{channelwidth} . '";"'.
+				$lista{$key}->{powerlevel}.'";"'.
+				$lista{$key}->{online} . '";"'.
+				$lista{$key}->{offline} . '";"'.
+				$lista{$key}->{total}.'";"'.
+				$lista{$key}->{downstreamfreq} . '"'
 				."\n";
     }
 	
@@ -72,8 +94,8 @@ sub toCSV
 # Reads info from the CMTS
 #
 sub SnrStatus {
-	my (%lista);
-	my $lista = %lista;
+	my %lista = ();
+	
 	my($cmts, $comunity, $style) = @_;
 	
         if ( $style eq 'cisco' ) {
@@ -104,55 +126,63 @@ sub SnrStatus {
 	}
 	
 	my @out = `$walker -v1 -c $comunity $cmts $descroid `;
-    
 	foreach $i (@out) {
 		chomp($i);
-		my ( $v, $maters) = split(/\./, $i);
-		my ($id, $descr) = split(/=/, $maters);
+		my ($id, $descr) = split(/=/, $i);
+		my @v = split(/\./, $id);
+		$id = pop(@v);
 		$descr =~ s/STRING: //gi;
 		if ($DEBUG > 0) 
 		{
-			print "descr:".$descr."\n";
+			print " ID " . $id . " descr:".$descr."\n";
 		}
+
+		if (!($descr =~ m/upstream/i) && !($descr =~ m/US /) ) { # US used by arris 
+			next;
+		}
+
 		$mib = $hash{snr}.$id; # snr mib
 		my ($tmp, $snr) = split(/INTEGER: /,`$walker -v1 -c $comunity $cmts $mib`);
 		$snr = ($snr/10);
-		$lista{ $descr }{snr} = $snr;
+		$lista{ $descr }{'snr'} = $snr;
 		
-		$mib = $hash{frequencia}.$id;
+		$mib = $hash{'frequencia'}.$id;
 		my ($tmp, $upfreq) = split(/INTEGER: /, `$walker -v1 -c $comunity $cmts $mib` );
 		chomp($upfreq);
-		$lista{ $descr }{frequencia} = $upfreq;
+		$lista{ $descr }->{'frequencia'} = $upfreq;
 		
-		$mib = $hash{modulacao}.$id;
+		$mib = $hash{'modulacao'}.$id;
 		my ($tmp, $tmp2) = split(/INTEGER: /, `$walker -v1 -c $comunity $cmts $mib` );
 		chomp($tmp2);
-		$lista{ $descr }{modulacao} = $tmp2;
+		$lista{ $descr }->{modulacao} = $tmp2;
 		
 		$mib = $hash{channelwidth}.$id;
 		my ($tmp, $tmp2) = split(/INTEGER: /, `$walker -v1 -c $comunity $cmts $mib` );
 		chomp($tmp2);
-		$lista{ $descr }{channelwidth} = $tmp2;
+		$lista{ $descr }->{channelwidth} = $tmp2;
 		
 		$mib = $hash{online}.$id;
 		my ($tmp, $tmp2) = split(/INTEGER: /, `$walker -v1 -c $comunity $cmts $mib` );
 		chomp($tmp2);
-		$lista{ $descr }{online} = $tmp2;
+		$lista{ $descr }->{online} = $tmp2;
 		
 		$mib = $hash{total}.$id;
 		my ($tmp, $tmp2) = split(/INTEGER: /, `$walker -v1 -c $comunity $cmts $mib` );
 		chomp($tmp2);
-		$lista{ $descr }{total} = $tmp2;
+		$lista{ $descr }->{total} = $tmp2;
 		
-		$lista{$descr}{offline} = $lista{ $descr }{total} - $lista{ $descr }{online};
+		$lista{$descr}->{offline} = $lista{$descr }->{total} - $lista{ $descr }->{online};
 		
 		$mib = $hash{downstreamfreq}.$id;
 		my ($tmp, $tmp2) = split(/INTEGER: /, `$walker -v1 -c $comunity $cmts $mib` );
 		chomp($tmp2);
-		$lista{ $descr }{downstreamfreq} = $tmp2;
+		$lista{ $descr }->{downstreamfreq} = $tmp2;
+		testData( $lista{ $descr });
 	}
-	print "preparing output\n";
-	toCSV(%lista);
+	if ($CSVOUT == 1 ) {
+		print "preparing output\n";
+		toCSV(%lista);
+	}
 }
 
 
@@ -161,6 +191,17 @@ sub SnrStatus {
 #
 print " cmtsUsage \n";
 print " Starting with arguments 0=".$ARGV[0]." 1=".$ARGV[1]." 2=".$ARGV[2]." 3=".$ARGV[3]."\n";
+
+foreach my $argnum (0 .. $#ARGV) {
+	if ( $ARGV[$argnum] eq '--alert-snr' ){
+		$ALERTSNR = 1;	
+	}
+	elsif ( $ARGV[$argnum] eq '--no-csv' ) {
+		$CSVOUT = 0;
+	}
+}
+
+
 if ($ARGV[0] ne '--file'){
 	my $fail = 0 ;
 	if ($ARGV[1] eq ''){
@@ -213,17 +254,6 @@ if ($ARGV[0] ne '--file'){
 		print "Reading ".$ip." ".$community." ".$type." to csv file ".$outfile.".csv \n";
 		SnrStatus($ip, $community, $type);		
 	}
-} 
-# Last parameter should be cisco usually in case of terayon CMTS I have found the second oid to work with terayon cmts
-#
-# Para a proxima versao
-# $numArgs = $#ARGV + 1;
-# print "thanks, you gave me $numArgs command-line arguments.\n";
-#
-# foreach $argnum (0 .. $#ARGV) {
-#    print "$ARGV[$argnum]\n";
-#	if ( $ARGV[$argnum] eq '' ){
-#	
-#	}
-# }
+}
+
 
