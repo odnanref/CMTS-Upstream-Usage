@@ -18,6 +18,7 @@
 # A copy online can be found at http://www.gnu.org/licenses/gpl-2.0.html 
 #
 
+my $NETCRASH =1;
 
 =item alert_snr($Data, $cmts)
 
