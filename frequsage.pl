@@ -142,8 +142,8 @@ sub toCSV
 	
 	if ($outfile ne '' )
 	{
-		print "name of csv file ".$outfile.".csv \n";
-		open(FH, "> ".$outfile.".csv");
+		print "name of csv file ".$mycwd."/".$outfile.".csv \n";
+		open(FH, "> ".$mycwd."/".$outfile.".csv");
 		print FH $csv;
 		close(FH);
 	}
