@@ -284,7 +284,7 @@ sub run
 		chomp($type);
 		$outfile = $ip;
 		$outfile =~ s/\.//gi;
-		print "Reading ".$ip." ".$community." ".$type." to csv file ".$outfile.".csv \n";
+		print "Reading ".$ip." ".$community." ".$type."\n";
 		SnrStatus($ip, $community, $type);		
 	}
 }
