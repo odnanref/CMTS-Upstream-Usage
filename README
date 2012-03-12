@@ -34,4 +34,6 @@ $MAIL_TO should have the format $MAIL_TO = "x\@domain.com, y\@domain.com";
 more then one e-mail please use commas, this was tested and working 
 under postfix
 
+Example launch for daemon and alert usage:
+./frequsage.pl --file a.txt --alert-snr --no-csv -d --alert-cm
 
