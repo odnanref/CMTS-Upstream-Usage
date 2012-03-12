@@ -41,9 +41,10 @@ my $mib;
 my (%hash);
 # name of csv output file default is the ip.csv ip withouht dots
 my $outfile;
+# set to 0 to disable
 # set to 1 to enable code debug
 # set to 2 to debug snr alerts
-our $DEBUG	=3;
+our $DEBUG	=0;
 
 =pod 
 
