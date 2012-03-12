@@ -13,3 +13,25 @@
 
 This Perl script requires snmpwalk to get SNMP output from the CMTS
 
+Added
+
+--no-csv # disables csv output file IMPORTANT  
+
+--alert-snr # enables snr alert system
+
+--alert-cm # enables Cable modem online variation alert system
+
+-d # set's to background running has a daemon every 5 minutes 
+chroot for daemon will be /tmp 
+
+IMPORTANT:
+-d requires a file to be specified with option --file filename
+
+This uses the sendmail binary to send email alerts for email's
+specified in frequsage.pl in variable $MAIL_TO
+
+$MAIL_TO should have the format $MAIL_TO = "x\@domain.com, y\@domain.com";
+more then one e-mail please use commas, this was tested and working 
+under postfix
+
+
