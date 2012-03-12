@@ -20,12 +20,15 @@
 #
 use strict;
 use Data::Dumper;	# for debug only
+use Cwd;
 use background;		# background daemon code
 use alertTests;		# code for alert reporting
 use oids;			# keeps oids for different types of cmts
 
 # SPECIFIC CONFIG VARS
 our $MAIL_TO = "cableboy\@domain.com";
+
+our $mycwd = getcwd;
 
 my $walker = '/usr/bin/snmpwalk ';
 # total cm's online
@@ -357,7 +360,7 @@ chroot for daemon will be /tmp \n
 	}
 	
 }else{
-	my $file = $ARGV[1];
+	my $file = $mycwd."/".$ARGV[1];
 	if ( !-r $file)
 	{
 		die("Unable to read file $file\n");	
