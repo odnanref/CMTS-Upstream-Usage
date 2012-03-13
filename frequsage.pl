@@ -47,6 +47,7 @@ my $outfile;
 # set to 0 to disable
 # set to 1 to enable code debug
 # set to 2 to debug snr alerts
+# set to 4 to debug ignore list
 our $DEBUG	=0;
 
 =pod 
@@ -320,6 +321,11 @@ if ( $DAEMON == 1 ) {
 	daemonize();
 	$SIG{TERM} = sub { $continue = 0 };
 }
+
+# 
+# Loads ignore list
+#
+loadIgnoreList();
 
 if ($ARGV[0] ne '--file'){
 	my $fail = 0 ;
