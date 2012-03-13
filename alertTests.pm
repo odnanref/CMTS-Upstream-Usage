@@ -18,6 +18,8 @@
 # A copy online can be found at http://www.gnu.org/licenses/gpl-2.0.html 
 #
 
+our %ignoreList = ();
+
 my $NETCRASH =1;
 
 =item alert_snr($Data, $cmts)
@@ -32,6 +34,12 @@ sub alert_snr
 	my ($Data, $cmts) = @_;
 	
 	if (defined($Data->{'snr'})) {
+
+		if (ignoreUps($cmts,  $Data->{"descr"}) == 1) {
+			print "DEBUG ignore lst: ignoring\n" if $DEBUG == 4;
+			return 0;
+		}
+
 		#
 		# test if field already exists in hash
 		# check if alertsnr is enabled ALERTSNR = 1
@@ -72,6 +80,12 @@ sub alert_cm {
 	print "CM DEBUG: ALERT IN\n" if $DEBUG == 3;
 	
 	if (defined($Data->{'online'})) {
+
+		if (ignoreUps($cmts,  $Data->{"descr"}) == 1) {
+			print "DEBUG ignore lst: ignoring\n" if $DEBUG == 4;
+			return 0;
+		}
+
 		if ( defined($hashAlertCM{$cmts}{ $Data->{"descr"} }) && 
 			$ALERTCM == 1 &&
 			( (($Data->{"online"})+0) < (($hashAlertCM{$cmts}{ $Data->{"descr"} })-10) ) ) 
@@ -97,6 +111,69 @@ sub alert_cm {
 			print "NO ONLINE HASH specified\n";
 		}
 	}
+}
+
+=item loadIgnoreList
+
+ Load ignore list to memory
+
+ file: mycwd/ignore.ups
+
+=cut
+
+sub loadIgnoreList {
+	
+	if ($DEBUG == 4) {
+		print "DEBUG ignore lst: STARTED\n";
+	}
+
+	if ( !-r($mycwd."/ignore.ups") ) {
+		if ($DEBUG == 4 ) {
+			print "DEBUG ignore lst: no file found... $mycwd/ignore.ups \n";
+		}
+		return 0;
+	}
+	
+	print "DEBUG ignore lst: loading file $mycwd/ignore.ups \n" if $DEBUG == 4;
+	
+	my $file = $mycwd."/ignore.ups";	
+	open(FH, $file) || die("frequsage.pl Failed opening file ignore.ups");
+	my @DATA = <FH>;
+	close(FH);
+	
+	foreach my $LINE_VAR (@DATA)
+	{
+		chomp($LINE_VAR);
+		my ($cmts, $ups) = split(";", $LINE_VAR);
+		if (defined($cmts) && defined($ups)) {
+			print "DEBUG loading Ignore lst: ".$cmts. " - ".$ups."\n" if $DEBUG == 4;
+			
+			$ups =~ s/ |\"//gi;
+			$ignoreList{$cmts}->{$ups} = 1; # assignment just for set
+		}
+	}
+}
+
+=item ignoreUps($cmts, $upstream)
+
+	should ignore upstream alerts ?
+
+	return (0, 1)
+=cut
+
+sub ignoreUps {
+	my ($cmts, $ups) = @_;
+	
+	$ups	=~ s/ |\"//gi;
+	
+	if ($ignoreList{$cmts}->{$ups}) {
+		print "DEBUG IGNORING upstream :".$cmts." - ".$ups."\n" if ($DEBUG == 4 );
+		return 1;
+	} else {
+		print "DEBUG NOT IGNORING upstream :".$cmts." - ".$ups."\n" if ($DEBUG == 4));
+	}
+
+	return 0;
 }
 
 =item freq_alert($message, $subjet)
@@ -129,5 +206,4 @@ sub freq_alert {
 	close(SENDMAIL);
 	print "MESSAGE:".$message."\n";
 }
-
 
