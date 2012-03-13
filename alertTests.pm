@@ -170,7 +170,7 @@ sub ignoreUps {
 		print "DEBUG IGNORING upstream :".$cmts." - ".$ups."\n" if ($DEBUG == 4 );
 		return 1;
 	} else {
-		print "DEBUG NOT IGNORING upstream :".$cmts." - ".$ups."\n" if ($DEBUG == 4));
+		print "DEBUG NOT IGNORING upstream :".$cmts." - ".$ups."\n" if ($DEBUG == 4);
 	}
 
 	return 0;
