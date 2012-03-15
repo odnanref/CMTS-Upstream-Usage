@@ -50,12 +50,14 @@ sub alert_snr
 			( (($Data->{"snr"})+0) < (($hashAlertSnr{$cmts}{ $Data->{"descr"} })-5) ) ) 
 		{
 			# ISSUE ALERT if diference between curent and old less then 5
+			my $descr	= $Data->{"descr"};
+			$descr		=~ s/\"//gi;
 			freq_alert(
 				"SNR detectada diferença significativa desde ultima leitura \n"
 				. "Ultima: ". $hashAlertSnr{$cmts}{ $Data->{"descr"} } ." \n"
 				. "Actual: ".$Data->{"snr"}."\n"
-				. "Interface " . $Data->{"descr"}."\n"
-				, "[ALERTA] SNR de $cmts \n"
+				. "Interface " . $descr ."\n"
+				, "[ALERTA] SNR: $cmts $descr \n"
 				);
 		} else {
 			if ($DEBUG == 2) {
@@ -90,11 +92,13 @@ sub alert_cm {
 			$ALERTCM == 1 &&
 			( (($Data->{"online"})+0) < (($hashAlertCM{$cmts}{ $Data->{"descr"} })-10) ) ) 
 		{
+			my $descr = $Data->{"descr"};
+			$descr =~ s/\"//gi;
 			freq_alert("Alerta total de modems online variou em 10\n" 
 			. " # de CM online antes:" . $hashAlertCM{$cmts}{ $Data->{"descr"} } ."\n"
 		    . " # de CM ONLINE AGORA:" . $Data->{'online'} . "\n"
-			. " INTERFACE: " . $Data->{"descr"} ."\n" 
-			, "[ALERTA] Cable modem Online: $cmts "
+			. " INTERFACE: " . $descr ."\n" 
+			, "[ALERTA] #CM: $cmts $descr "
 			);
 
 		} else {
